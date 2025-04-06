@@ -49,7 +49,7 @@ Open the crontab editor:
 Add the following line to execute the program every 5 minutes:
 
    ```bash
-   */5 * * * * /path/to/ddns_cloudflare_rust/target/release/ddns_cloudflare_rust
+   */5 * * * * /path/to/ddns_cloudflare_rust/target/release/ddns_cloudflare
    ```
 Replace /path/to/ddns_cloudflare_rust/target/release/ddns_cloudflare_rust with the actual path to your built executable.
 
