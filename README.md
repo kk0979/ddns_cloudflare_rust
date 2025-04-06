@@ -9,7 +9,7 @@
    ```bash
    git clone https://github.com/kk0979/ddns_cloudflare_rust.git
    cd ./ddns_cloudflare_rust
-Add a .env file in the project directory. The .env file should contain the following parameters:
+Add a .env file in the project root directory. The .env file should contain the following parameters:
 
    ```env
    API_TOKEN=your_api_token
