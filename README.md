@@ -32,6 +32,11 @@ To build and run the application, use the following command:
    ```bash
    cargo run
    ```
+To build release
+   ```bash
+   cargo build --release
+   ```
+You can find it on ./target/release
 
 ## Running Periodically (Optional)
 If you want the program to run periodically, you can use crontab to schedule the execution.
