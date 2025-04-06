@@ -3,6 +3,7 @@ use reqwest::Client;
 use serde::Serialize;
 use std::env;
 use std::error::Error;
+use std::net::{SocketAddr, ToSocketAddrs};
 
 #[derive(Serialize)]
 struct DnsUpdateRequest {
@@ -11,6 +12,11 @@ struct DnsUpdateRequest {
     content: String,
     ttl: u32,
     proxied: bool,
+}
+
+fn get_ip_address(domain: &str) -> Result<Vec<SocketAddr>, std::io::Error> {
+    let sockets = (domain, 80).to_socket_addrs()?;
+    Ok(sockets.collect()) // IP 주소 목록을 반환
 }
 
 #[tokio::main]
@@ -24,12 +30,39 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let public_ip = get_public_ip().await?;
     println!("Public IP: {}", public_ip);
 
-    match update_dns_record(&api_token, &zone_id, &record_id, &public_ip).await {
-        Ok(_) => {
-            println!("DNS record updated successfully!");
+    let domain = env::var("DOMAIN")?;
+    match get_ip_address(domain.as_str()) {
+        Ok(ips) => {
+            let mut found = false;
+            for ip in ips {
+                if public_ip == ip.ip().to_string() {
+                    println!("IP on DNS: {} - found", ip.ip()); // IP만 출력
+                    found = true;
+                } else {
+                    println!("IP on DNS: {}", ip.ip()); // IP만 출력
+                }
+            }
+            if found == false {
+                match update_dns_record(&api_token, &zone_id, &record_id, &public_ip).await {
+                    Ok(_) => {
+                        println!("DNS record updated successfully!");
+                    }
+                    Err(_) => {
+                        eprintln!("Failed to update DNS record.");
+                    }
+                }
+            }
         }
-        Err(_) => {
-            println!("Failed to update DNS record.");
+        Err(e) => {
+            eprintln!("Failed to load ip on DNS. {}", e);
+            match update_dns_record(&api_token, &zone_id, &record_id, &public_ip).await {
+                Ok(_) => {
+                    println!("DNS record updated successfully!");
+                }
+                Err(_) => {
+                    eprintln!("Failed to update DNS record.");
+                }
+            }
         }
     }
 
